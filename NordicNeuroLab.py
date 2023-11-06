@@ -45,6 +45,26 @@ class SyncBox:
 
         self.port = self._findSyncBox()
         self._configure()
+    
+
+    def readCurrentInputBuffer(self) -> str:
+        """
+        This function will read the current input buffer from the SyncBox 
+        even if it is empty. Useful for use within loops.
+        
+        Return
+        ------
+        trigger : str
+            "s" for synchronization
+            "a" for left thumb on ResponseGrips
+            "b" for left index on ResponseGrips
+            "c" for right index on ResponseGrips
+            "d" for right thumb on ResponseGrips
+        
+        """
+        out = self.port.read(self.port.in_waiting)
+        return out.decode("utf-8")
+        
 
 
     def getTrigger(self, timeout = 0) -> str:
@@ -69,6 +89,7 @@ class SyncBox:
         """
         self.port.timeout = timeout
         out = self.port.read(1)
+        self.port.timeout = None
         return out.decode("utf-8")
     
     def start(self) -> None:
