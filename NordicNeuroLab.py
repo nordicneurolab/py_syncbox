@@ -43,7 +43,7 @@ class SyncBox:
         self.optional_trigger_volume = optional_trigger_volume
         self.simulation = simulation
 
-        self._com = self._findSyncBox()
+        self.port = self._findSyncBox()
         self._configure()
 
 
@@ -67,8 +67,8 @@ class SyncBox:
             "d" for right thumb on ResponseGrips
         
         """
-        self._com.timeout = timeout
-        out = self._com.read(1)
+        self.port.timeout = timeout
+        out = self.port.read(1)
         return out.decode("utf-8")
     
     def start(self) -> None:
@@ -81,9 +81,9 @@ class SyncBox:
             if unable to start session
 
         """
-        self._com.write(b"S")
+        self.port.write(b"S")
         time.sleep(0.1)
-        confirmation = self._com.read(1)
+        confirmation = self.port.read(1)
         time.sleep(0.1)
         if confirmation != b"S":
             raise SyncBoxException(f"Unable to start session {confirmation}")
@@ -98,9 +98,9 @@ class SyncBox:
             if unable to stop session
 
         """
-        self._com.write(b"A")
+        self.port.write(b"A")
         time.sleep(0.1)
-        confirmation = self._com.read(1)
+        confirmation = self.port.read(1)
         time.sleep(0.1)
         if confirmation != b"A":
             raise SyncBoxException("Unable to stop session")
@@ -132,7 +132,7 @@ class SyncBox:
                 time.sleep(0.1)
                 if confirmation == b"C":
                     return com
-                    break
+                    breakt
 
             except SerialException:
                 continue
@@ -153,29 +153,29 @@ class SyncBox:
             if incorrect confirmation is recieved from SyncBox
 
         """
-        self._com.write(b"R")   #Entering SyncBox configuration mode
+        self.port.write(b"R")   #Entering SyncBox configuration mode
         time.sleep(0.1)
-        confirmation = self._com.read(1)
+        confirmation = self.port.read(1)
         time.sleep(0.1)
         if confirmation != b"R":
             raise SyncBoxException(f"Unable to configure SyncBox. Please restart the SyncBox")
-        self._com.write(b"0000") #Dummy "0000"
-        self._com.write(self._stringVar(self.num_volumes)) #Number of volumes "xxxx"
-        self._com.write(self._stringVar(self.num_slices)) #Number of slices in each volume "xxxx"
-        self._com.write(self._stringVar(self.pulse_length)) #Pulse length in ms (Only needed in simulation mode) "xxxx"
-        self._com.write(self._stringVar(self.TR_time)) #TR time in ms (Only needed in simulation mode) "xxxx"
-        self._com.write(self._stringVar(self.trigger_slice)) #Slice number you like to trigger on "xxxx"
-        self._com.write(self._stringVar(self.trigger_volume)) #Enter how often you will trigger on volume "xxxx"
-        self._com.write(b"0000") #Dummy "0000"
-        self._com.write(b"0000") #Dummy "0000"
-        self._com.write(self._stringVar(self.optional_trigger_slice)) #0 for triggering on each slice typed above, 1 for triggering on each slice, 2 for triggering on random slice "000x"
-        self._com.write(self._stringVar(self.optional_trigger_volume)) #0 for triggering on each volume typed above, 1 for triggering on each volume, 2 for triggering on random volume "000x"
+        self.port.write(b"0000") #Dummy "0000"
+        self.port.write(self._stringVar(self.num_volumes)) #Number of volumes "xxxx"
+        self.port.write(self._stringVar(self.num_slices)) #Number of slices in each volume "xxxx"
+        self.port.write(self._stringVar(self.pulse_length)) #Pulse length in ms (Only needed in simulation mode) "xxxx"
+        self.port.write(self._stringVar(self.TR_time)) #TR time in ms (Only needed in simulation mode) "xxxx"
+        self.port.write(self._stringVar(self.trigger_slice)) #Slice number you like to trigger on "xxxx"
+        self.port.write(self._stringVar(self.trigger_volume)) #Enter how often you will trigger on volume "xxxx"
+        self.port.write(b"0000") #Dummy "0000"
+        self.port.write(b"0000") #Dummy "0000"
+        self.port.write(self._stringVar(self.optional_trigger_slice)) #0 for triggering on each slice typed above, 1 for triggering on each slice, 2 for triggering on random slice "000x"
+        self.port.write(self._stringVar(self.optional_trigger_volume)) #0 for triggering on each volume typed above, 1 for triggering on each volume, 2 for triggering on random volume "000x"
         if self.simulation:
-            self._com.write(b"0000") #0001 for synchronization 0000 for simualtion
+            self.port.write(b"0000") #0001 for synchronization 0000 for simualtion
         else:
-            self._com.write(b"0001")
+            self.port.write(b"0001")
         time.sleep(0.2)
-        confirmation = self._com.read(12*4)
+        confirmation = self.port.read(12*4)
         time.sleep(0.1)
         if len(confirmation) != 12*4:
             raise SyncBoxException(f"Unable to configure SyncBox. Please restart the SyncBox")
@@ -263,13 +263,13 @@ class SyncBox:
             if unable to turn off computer mode.
 
         """
-        self._com.write(b"D")  
+        self.port.write(b"D")  
         time.sleep(0.1)
-        confirmation = self._com.read(1)
+        confirmation = self.port.read(1)
         time.sleep(0.1)
         if confirmation != b"D":
             raise SyncBoxException("Unable to disconnect from SyncBox. Please turn it off manually")
-        self._com.close()
+        self.port.close()
         print("SyncBox disconnected")
 
 
